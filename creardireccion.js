@@ -1,6 +1,9 @@
 var Web3 = require("web3");
-//var web3 = new Web3();
-var web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws"));
+
+web3js = new Web3(Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io:443'))
+);
+
+
 
 //generate private key  
 privateKey = web3.eth.accounts.create().privateKey.substr(2);
