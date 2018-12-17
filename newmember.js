@@ -1,5 +1,6 @@
 const web3 = require("web3");
-var Tx = require('ethereumjs-tx');
+const EthereumTx = require('ethereumjs-tx')
+
 
 web3js = new web3(new web3.providers.HttpProvider("https://rinkeby.infura.io:443"));
 var communityFactoryABI = [
@@ -120,92 +121,43 @@ var pass = "ramirogalvan";
 
 //rinkeby
 var publicKey = "0x371066e8a3347C3448903ab3dD18b94d192c4D42";
-//var privateKey = "15cfe14a75459a4822b656554ac3ed5f45028f2771ccb71310a54b51ec17735e";
-var privateKey = new Buffer('15cfe14a75459a4822b656554ac3ed5f45028f2771ccb71310a54b51ec17735e', 'hex')
+var privateKey = "15cfe14a75459a4822b656554ac3ed5f45028f2771ccb71310a54b51ec17735e";
+//var privateKey = new Buffer('15cfe14a75459a4822b656554ac3ed5f45028f2771ccb71310a54b51ec17735e', 'hex')
 var pass = "ramirogalvan";
 
-///////
-async function createMember(param){
-    try{
-    const serializeTx = async (contractInstance, publicKey, privateKey, funcData) => {
-        //let privateKeyBuff = new Buffer.from(privateKey, 'hex');
-        let privateKeyBuff = privateKey;
+let deployerNonce = 0;
+const deployPrivateKey = Buffer.from(privateKey, 'hex');
+const deployPublicKey = Buffer.from(publicKey,'hex');
+const defaultTxParams = {
+	gasPrice: web3js.utils.toHex(web3js.utils.toWei('1', 'gwei')),
+	gasLimit: web3js.utils.toHex(8000000),
+	value: '0x',
+	chainId: 311001
+  };
 
-        const gasLimit = 272906;
+  console.log(web3js.utils.toWei('1', 'gwei'));
+  console.log(defaultTxParams);
 
-        const nonceNumber = await web3js.eth.getTransactionCount(publicKey);
-        const nonce = web3js.utils.toHex(nonceNumber);
-        const gasPrice = web3js.utils.toHex(web3js.eth.gasPrice);
-        const gas = web3js.utils.toHex(172906);
-        const gasLimitHex = web3js.utils.toHex(gasLimit);
-        const rawTx = {
-            'nonce': nonce,
-            'gasPrice': gasPrice,
-            'gasLimit': gasLimitHex,
-            'from': publicKey,
-            'to': contractInstance.address,
-            'data': funcData,
-            "gas": gas
-        };
-
-        let tx = new Tx(rawTx);
-        tx.sign(privateKeyBuff);
-
-        return '0x' + tx.serialize().toString('hex');
-    };
-
-    let funcData = communityFactory.methods.createRandomMember(param).encodeABI();
-
-    const serializedTx = await serializeTx(
-        communityFactory,
-        publicKey,
-        privateKey,
-        funcData,
-    );
-
-    let result = await web3js.eth.sendSignedTransaction(serializedTx);
-    console.log(result);
-    } catch(e){
-        console.log("ErrorrrrR: " + e);
-    }
-}
-createMember("Juan");
-/////////////
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-function createRandomMember(name) {
-    // Enviar el texto hacia nuestro contrato:
-    return communityFactory.methods.createRandomMember(name)
-    .sendSignedTransaction(,data,{ from: userAccount })
-    .on("receipt", function(receipt) {
-        console.log(receipt);
-    })
-    .on("error", function(error) {
-      // Se avisa al usuario de que su transacción no ha sido completada con éxito
-      console.log(error);
-    });
+  function signTransaction(txParams, signerPrivKey) {
+	const ethereumTx = new EthereumTx(txParams);
+	ethereumTx.sign(signerPrivKey);
+	return `0x${ethereumTx.serialize().toString('hex')}`;
   }
 
-  createRandomMember("Juan");
+  async function createRandomMember(name, from, signerPrivKey) {
+	  try{
+	const txParams = {
+	  ...defaultTxParams,
+	  nonce: web3js.utils.toHex(deployerNonce),
+	  to: communityFactoryAddress,
+	  data: communityFactory.methods.createRandomMember(name).encodeABI(),
+	};
+	deployerNonce += 1;
+	const signedTransaction = signTransaction(txParams, signerPrivKey);
+	await web3js.eth.sendSignedTransaction(signedTransaction, { from });
+} catch(e){
+	console.log("ACA Error: " +e);
+}
+  }
 
-  */
+  createRandomMember("juan",deployPublicKey,deployPrivateKey);
