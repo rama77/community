@@ -107,7 +107,7 @@ var communityFactoryABI = [
 		"type": "function"
 	}
 ]
-var communityFactoryAddress = "0x7d711958665f15095995953ec8c10fadec3cc714";
+var communityFactoryAddress = "0xa7a11b32251dcf0ec61ae8db13d622b9532068e1";
 
 //creating contract object
 var communityFactory = new web3js.eth.Contract(communityFactoryABI,communityFactoryAddress);
@@ -132,7 +132,7 @@ const defaultTxParams = {
 	gasPrice: web3js.utils.toHex(web3js.utils.toWei('1', 'gwei')),
 	gasLimit: web3js.utils.toHex(8000000),
 	value: '0x',
-	chainId: 311001
+	chainId: 4
   };
 
   console.log(web3js.utils.toWei('1', 'gwei'));
